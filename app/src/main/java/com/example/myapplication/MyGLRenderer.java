@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import static android.app.ProgressDialog.show;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
@@ -13,6 +14,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import java.io.Console;
 
@@ -26,8 +28,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
     Context context;   // Application's context
-
-    float[] angular = new float[3];
 
     private Light light;
     boolean cam = true;
@@ -98,8 +98,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     boolean menu = true;
 
 
-    float angle = 0;
     public float zCam = 0;
+    int currentPos = 0;
 
     public float xCamPos = 0;
     public float yCamPos = 0.9f;
@@ -118,12 +118,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static float jumpHeight = 1.0f;
     private static float jumpVelocity = 0.0f;
     private static float gravity = 0.005f;
-    float[] fogColor = {0f, 0f, 0f, 0.7f};  // Color gris claro en formato RGBA
+    float[] fogColor = {0f, 0f, 0f, 0.7f};
 
-    private MediaPlayer doomBG;
+    MediaPlayer doomBG;
     boolean niebla = true;
-
-    long lastTime = 0, currentTime;
 
 
     // Constructor with global application context
@@ -181,6 +179,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         this.listaObjetos[48] = new Object3D(context, R.raw.suelo2_obj);
         this.listaObjetos[49] = new Object3D(context, R.raw.suelo3_obj);
         this.listaObjetos[50] = new Object3D(context, R.raw.suelo4_obj);
+        this.listaObjetos[51] = new Object3D(context, R.raw.controles_obj);
         doomBG = MediaPlayer.create(context, R.raw.doom);
 
     }
@@ -268,6 +267,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         this.listaObjetos[48].loadTexture(gl, context, R.raw.suelo2);
         this.listaObjetos[49].loadTexture(gl, context, R.raw.suelo3);
         this.listaObjetos[50].loadTexture(gl, context, R.raw.suelo4);
+        this.listaObjetos[51].loadTexture(gl, context, R.raw.controles);
 
         caraDoom = new TextureCube();
         menuHUD = new TextureCube();
@@ -333,7 +333,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         } else {
 
 
-            if (niebla) {
+            if (!niebla) {
                 gl.glEnable(GL10.GL_FOG);
                 gl.glFogf(GL10.GL_FOG_MODE, GL10.GL_LINEAR);
                 gl.glFogfv(GL10.GL_FOG_COLOR, fogColor, 0);
@@ -342,22 +342,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             } else {
                 gl.glDisable(GL10.GL_FOG);
             }
-            frame = (frame+1)%60;
+            frame = (frame+1)%46;
             if(frame %7 == 0){
                 k = (k+1)%5;
             }
-            for (int i = 0; i < 51; i++) {
+            for (int i = 0; i < 52; i++) {
                 gl.glPushMatrix();
                 if (i >= 36 && i <= 40) {
-                    if (frame <= 30) {
+                    if (frame < 23) {
                         verticalMovement += 0.01f;
                     } else {
                         verticalMovement -= 0.01f;
                     }
                     gl.glTranslatef(0.0f, -verticalMovement, 0.0f);
                     this.listaObjetos[i].draw(gl);
-                } else if (i == 23 || (i >= 29 && i <= 32)) {
-                    this.listaObjetos[i].shiftUVsH();
+                } else if (i == 23 || i == 44 || (i >= 28 && i <= 32)) {
+                    this.listaObjetos[i].shiftUVsH(0.01f);
+                    this.listaObjetos[i].draw(gl);
+                }else if(i == 21){
+                    this.listaObjetos[i].shiftUVsH(0.0005f);
                     this.listaObjetos[i].draw(gl);
                 } else if (i == 1) {
                     if (cajaMaderaExiste)
@@ -372,7 +375,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             hud.loadTexture(gl, context, R.raw.doom_hud);
 
-
+            gl.glDisable(GL10.GL_FOG);
             // Dibujar el HUD
             setOrthographicProjection(gl);
             gl.glPushMatrix();
@@ -386,7 +389,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             cargarCaraDoom(gl);
 
 
-            setOrthographicProjection(gl);
             gl.glPushMatrix();
             gl.glScalef(0.4f, 0.5f, 1f);
             gl.glTranslatef(0f, -7f, 0f);
@@ -394,7 +396,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             gl.glPopMatrix();
 
         }
-            //2132082845 - 2132082846 - 2132082847 - 2132082848 - 2132082849
     }
 
     public void cargarCaraDoom(GL10 gl) {

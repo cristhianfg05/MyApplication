@@ -200,24 +200,10 @@ public class Object3D {
 
 
 
-	public void shiftUVs() {
-		uvShift += 0.01f;  // Puedes ajustar el valor según la velocidad deseada de desplazamiento
 
-		// Ajusta las coordenadas de textura según el desplazamiento
-		texcoordBuffer.position(0);
-		for (int j = 0; j < tindex.size(); j++) {
-			float adjustedU = tlist.get(tindex.get(j) * 2) + uvShift;
-			float adjustedV = tlist.get(tindex.get(j) * 2 + 1) + uvShift;
-			texcoordBuffer.put(adjustedU);
-			texcoordBuffer.put(adjustedV);
-		}
-
-		texcoordBuffer.position(0);
-	}
-
-	public void shiftUVsH() {
+	public void shiftUVsH(float shift) {
 		// Accede a tlist para ajustar las coordenadas de textura
-		uvShift += 0.01f;
+		uvShift += shift;
 
 		texcoordBuffer.position(0);
 		for (int j = 0; j < tindex.size(); j++) {

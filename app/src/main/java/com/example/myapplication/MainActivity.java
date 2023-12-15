@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
-
+        Toast.makeText(MainActivity.this, "pulsa H para comenzar", Toast.LENGTH_SHORT).show();
         glView = new GLSurfaceView(this);           // Allocate a GLSurfaceView
         glView.setRenderer(myGLRenderer=new MyGLRenderer(this)); // Use a custom renderer
         this.setContentView(glView);                // This activity sets to GLSurfaceView
@@ -150,6 +150,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case KeyEvent.KEYCODE_F:
                 myGLRenderer.cajaMaderaExiste = false;
                 return true;
+            case KeyEvent.KEYCODE_H:
+                myGLRenderer.menu = false;
+                return true;
             case KeyEvent.KEYCODE_DPAD_UP:
                 myGLRenderer.moveCameraUp();
                 return true;
@@ -165,14 +168,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case KeyEvent.KEYCODE_SPACE:
                 myGLRenderer.jump();
                 return true;
-            case KeyEvent.KEYCODE_H:
-                myGLRenderer.menu = false;
-                Log.d("tecla", "onKeyDown: H");
-                return true;
             case KeyEvent.KEYCODE_N:
                 Log.d("tecla", "onKeyDown: N");
                 myGLRenderer.niebla = !myGLRenderer.niebla;
                 Log.d("tecla", myGLRenderer.niebla+"");
+                return true;
+            case KeyEvent.KEYCODE_P:
+                if(myGLRenderer.doomBG.isPlaying()){
+                    myGLRenderer.doomBG.pause();
+                    myGLRenderer.currentPos = myGLRenderer.doomBG.getCurrentPosition();
+                } else {
+                    myGLRenderer.doomBG.seekTo(myGLRenderer.currentPos);
+                    myGLRenderer.doomBG.start();
+                }
                 return true;
         }
 
